@@ -59,7 +59,6 @@ void bme280Task(void *pvParameters) {
 
 	//real32_t dato = 5000;
 
-	lValueToSend = 5000;
 
 	/* As per most tasks, this task is implemented within an infinite loop. */
 	for (;;) {
@@ -68,6 +67,8 @@ void bme280Task(void *pvParameters) {
 		rslt = bme280GetSensorData(BME280_ALL, &comp_data, &dev);
 
 		bme280PrintSensorData(&comp_data);
+
+		lValueToSend = comp_data.temperature;
 
 		gpioToggle(LED3);
 
