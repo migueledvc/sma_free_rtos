@@ -24,7 +24,7 @@
 /*=====[Definitions of public global variables]==============================*/
 
 /*=====[Definitions of private global variables]=============================*/
-static char buf[6];
+static char buf[5];
 static FATFS fs;      // <-- FatFs work area needed for each volume
 static FIL fp;        // <-- File object needed for each open file
 
@@ -36,15 +36,19 @@ void sdTask( void *pvParameters )
 {
    spiConfig( SPI0 );
 
+   uint8_t i = 0;
+   int n = 0;
+   int nbytes = 0;
+   
+   for ( uint8_t i=0; i<5; i++ ){
+      buf[i]=0;
+   }
+
    /* Declare the variable that will hold the values received from the queue. */
    real32_t lReceivedValue;
    BaseType_t xStatus;
    const TickType_t xTicksToWait = pdMS_TO_TICKS( 2500UL );
    
-   uint8_t i = 0;
-   int n = 0;
-   int nbytes = 0;
-
    FSSDC_InitSPI ();
    if( f_mount( &fs, "SDC:", 0 ) != FR_OK ){
       while (1) {
@@ -74,12 +78,12 @@ void sdTask( void *pvParameters )
     	  uartWriteString( UART_USB, buf);
     	  uartWriteString( UART_USB, " grados C\r\n" );
  		/* -------save in sd------------------------------------------------------*/
-   	if( f_open( &fp, "SDC:/log.txt", FA_WRITE | FA_OPEN_APPEND ) == FR_OK ) {
-         n = 6;
-         f_write( &fp,"temperature\r",12, &nbytes );               
-         f_write( &fp, buf, n, &nbytes );
-         n = 7;
-         f_write( &fp,"grados\r\n",n, &nbytes );  
+   	if( f_open( &fp, "SDC:/log3.txt", FA_WRITE | FA_OPEN_APPEND ) == FR_OK ) {
+         
+         f_write( &fp,"temp  \r",6, &nbytes );
+         f_write( &fp, buf, 5, &nbytes );
+         n = 10;
+         f_write( &fp,"  grados\r\n",n, &nbytes );
          f_close(&fp);
          if( nbytes == n ){
             uartWriteString( UART_USB, "Escribio correctamente\r\n ");
