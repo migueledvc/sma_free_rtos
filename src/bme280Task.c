@@ -59,7 +59,6 @@ void bme280Task(void *pvParameters) {
 
 	//real32_t dato = 5000;
 
-
 	/* As per most tasks, this task is implemented within an infinite loop. */
 	for (;;) {
 		dev.delay_ms(2750);

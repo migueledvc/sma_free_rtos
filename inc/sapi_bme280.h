@@ -73,7 +73,6 @@ extern "C" {
 #define FALSE                             UINT8_C(0)
 #endif
 
-
 /**\name I2C addresses */
 #define BME280_I2C_ADDR_PRIM              UINT8_C(0x76)
 #define BME280_I2C_ADDR_SEC               UINT8_C(0x77)

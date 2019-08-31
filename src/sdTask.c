@@ -32,75 +32,74 @@ static FIL fp;        // <-- File object needed for each open file
 
 /*=====[Implementations of public functions]=================================*/
 
-void sdTask( void *pvParameters )
-{
-   spiConfig( SPI0 );
+void sdTask(void *pvParameters) {
+	spiConfig(SPI0);
 
-   uint8_t i = 0;
-   int n = 0;
-   int nbytes = 0;
-   
-   for ( uint8_t i=0; i<5; i++ ){
-      buf[i]=0;
-   }
+	uint8_t i = 0;
+	int n = 0;
+	int nbytes = 0;
 
-   /* Declare the variable that will hold the values received from the queue. */
-   real32_t lReceivedValue;
-   BaseType_t xStatus;
-   const TickType_t xTicksToWait = pdMS_TO_TICKS( 2500UL );
-   
-   FSSDC_InitSPI ();
-   if( f_mount( &fs, "SDC:", 0 ) != FR_OK ){
-      while (1) {
-         gpioToggle( LED1 );
-         uartWriteString( UART_USB, "SD no disponible\r\n" );
-         vTaskDelay( 1000 / portTICK_RATE_MS );
-      }
-   }
+	for (uint8_t i = 0; i < 5; i++) {
+		buf[i] = 0;
+	}
 
-   /* This task is also defined within an infinite loop. */
-   for( ;; ) {
-      /* As this task unblocks immediately that data is written to the queue this
-      call should always find the queue empty. */
-      if( uxQueueMessagesWaiting( xQueueSd ) != 0 ) {
-         vPrintString( "Queue should have been empty!\r\n" );
-      }
+	/* Declare the variable that will hold the values received from the queue. */
+	real32_t lReceivedValue;
+	BaseType_t xStatus;
+	const TickType_t xTicksToWait = pdMS_TO_TICKS(2500UL);
 
-      xStatus = xQueueReceive( xQueueSd, &lReceivedValue, xTicksToWait );
+	FSSDC_InitSPI();
+	if (f_mount(&fs, "SDC:", 0) != FR_OK) {
+		while (1) {
+			gpioToggle(LED1);
+			uartWriteString(UART_USB, "SD no disponible\r\n");
+			vTaskDelay(1000 / portTICK_RATE_MS);
+		}
+	}
 
-      if( xStatus == pdPASS ) {
-         /* Data was successfully received from the queue, print out the received
-         value. */
-         //vPrintStringAndNumber( "Received = ", lReceivedValue );
+	/* This task is also defined within an infinite loop. */
+	for (;;) {
+		/* As this task unblocks immediately that data is written to the queue this
+		 call should always find the queue empty. */
+		if (uxQueueMessagesWaiting(xQueueSd) != 0) {
+			vPrintString("Queue should have been empty!\r\n");
+		}
 
-    	  uartWriteString( UART_USB, "Temperatura: " );
-    	  floatToString( lReceivedValue, buf, 2 );
-    	  uartWriteString( UART_USB, buf);
-    	  uartWriteString( UART_USB, " grados C\r\n" );
- 		/* -------save in sd------------------------------------------------------*/
-   	if( f_open( &fp, "SDC:/log3.txt", FA_WRITE | FA_OPEN_APPEND ) == FR_OK ) {
-         
-         f_write( &fp,"temp  \r",6, &nbytes );
-         f_write( &fp, buf, 5, &nbytes );
-         n = 10;
-         f_write( &fp,"  grados\r\n",n, &nbytes );
-         f_close(&fp);
-         if( nbytes == n ){
-            uartWriteString( UART_USB, "Escribio correctamente\r\n ");
-            gpioWrite( LEDG, ON );
-         } else {
-            gpioWrite( LEDR, ON );
-            uartWriteString( UART_USB, "Error al escribir\r\n ");
-         }
-    } else{
-         uartWriteString( UART_USB, "Error al abrir el archivo\r\n" );
-         gpioWrite( LEDR, ON );
-      }      
-		/* ---------fin save in sd-----------------------------------------------*/
+		xStatus = xQueueReceive(xQueueSd, &lReceivedValue, xTicksToWait);
 
-      } else {
-         /* We did not receive anything from the queue even after waiting*/
-         vPrintString( "Could not receive from the queue.\r\n" );
-      }
-   }
+		if (xStatus == pdPASS) {
+			/* Data was successfully received from the queue, print out the received
+			 value. */
+			//vPrintStringAndNumber( "Received = ", lReceivedValue );
+			uartWriteString(UART_USB, "Temperatura: ");
+			floatToString(lReceivedValue, buf, 2);
+			uartWriteString(UART_USB, buf);
+			uartWriteString(UART_USB, " grados C\r\n");
+			/* -------save in sd------------------------------------------------------*/
+			if (f_open(&fp, "SDC:/log3.txt", FA_WRITE | FA_OPEN_APPEND)
+					== FR_OK) {
+
+				f_write(&fp, "temp  \r", 6, &nbytes);
+				f_write(&fp, buf, 5, &nbytes);
+				n = 10;
+				f_write(&fp, "  grados\r\n", n, &nbytes);
+				f_close(&fp);
+				if (nbytes == n) {
+					uartWriteString(UART_USB, "Escribio correctamente\r\n ");
+					gpioWrite(LEDG, ON);
+				} else {
+					gpioWrite(LEDR, ON);
+					uartWriteString(UART_USB, "Error al escribir\r\n ");
+				}
+			} else {
+				uartWriteString(UART_USB, "Error al abrir el archivo\r\n");
+				gpioWrite(LEDR, ON);
+			}
+			/* ---------fin save in sd-----------------------------------------------*/
+
+		} else {
+			/* We did not receive anything from the queue even after waiting*/
+			vPrintString("Could not receive from the queue.\r\n");
+		}
+	}
 }
