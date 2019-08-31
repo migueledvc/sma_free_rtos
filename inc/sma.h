@@ -18,6 +18,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "sapi.h"
+
 
 /* Demo includes. */
 #include "supporting_functions.h"
@@ -25,7 +27,8 @@
 #include "sapi_bme280.h"
 #include <stdint.h>
 #include <stddef.h>
-
+#include "ff.h"
+#include "fssdc.h"
 
 /*=====[C++ - begin]=========================================================*/
 
@@ -41,12 +44,13 @@ extern "C" {
 /*=====[Definitions of public data types]====================================*/
 /* Declare a variable of type QueueHandle_t.  This is used to store the queue
 that is accessed by all three tasks. */
-QueueHandle_t xQueue;
+QueueHandle_t xQueue, xQueueSd;
 /*=====[Prototypes (declarations) of public functions]=======================*/
 void bme280Task( void *pvParameters );
 void am2301Task( void *pvParameters );
 void vSenderTask2( void *pvParameters );
 void vReceiverTask( void *pvParameters );
+void sdTask( void *pvParameters );
 /*=====[Prototypes (declarations) of public interrupt functions]=============*/
 
 /*=====[C++ - end]===========================================================*/

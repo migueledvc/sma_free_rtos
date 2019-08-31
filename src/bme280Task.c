@@ -16,7 +16,7 @@
 
 void bme280Task(void *pvParameters) {
 	real32_t lValueToSend;
-	BaseType_t xStatus;
+	BaseType_t xStatus, xStatusSd;
 
 	struct bme280_dev dev;
 	int8_t rslt = BME280_OK;
@@ -72,8 +72,14 @@ void bme280Task(void *pvParameters) {
 		gpioToggle(LED3);
 
 		xStatus = xQueueSendToBack(xQueue, &lValueToSend, 0);
+		xStatusSd = xQueueSendToBack(xQueueSd, &lValueToSend, 0);
 
 		if (xStatus != pdPASS) {
+			/* We could not write to the queue because it was full � this must
+			 be an error as the queue should never contain more than one item! */
+			vPrintString("Could not send to the queue.\r\n");
+		}
+		if (xStatusSd != pdPASS) {
 			/* We could not write to the queue because it was full � this must
 			 be an error as the queue should never contain more than one item! */
 			vPrintString("Could not send to the queue.\r\n");

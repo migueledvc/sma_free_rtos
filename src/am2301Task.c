@@ -22,8 +22,8 @@ void am2301Task( void *pvParameters )
       should the queue already be full.  In this case we don�t specify a block
       time because there should always be space in the queue. */
 	   if( dht11Read(&humidity, &temperature) ) {
-	   	   gpioWrite( LEDG, ON );
-	   	   gpioWrite( LEDR, OFF );
+	   	   //gpioWrite( LEDG, ON );
+	   	   //gpioWrite( LEDR, OFF );
 
 	      lValueToSend = temperature;
 
@@ -36,8 +36,8 @@ void am2301Task( void *pvParameters )
 	      }
 	   }
 	   else {
-    	  gpioWrite( LEDG, OFF );
-    	  gpioWrite( LEDR, ON );
+    	  //gpioWrite( LEDG, OFF );
+    	  //gpioWrite( LEDR, ON );
 	   }
 	   vTaskDelay( 1000 / portTICK_RATE_MS );
    }

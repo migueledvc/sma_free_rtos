@@ -14,6 +14,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "ff.h"
+#include "fssdc.h"
 
 /* Demo includes. */
 #include "supporting_functions.h"
@@ -25,28 +27,32 @@ int main( void )
 {
    /* The queue is created to hold a maximum of 5 long values. */
    xQueue = xQueueCreate( 5, sizeof( real32_t ) );
+   xQueueSd = xQueueCreate( 5, sizeof( real32_t ) ); 
 
-   boardConfig(); // Inicializar y configurar la plataforma
-   uartConfig( UART_USB, 115200 ); // Inicializar periferico UART_USB
-   i2cInit(I2C0, BME280_I2C_RATE);
-
+  boardConfig(); // Inicializar y configurar la plataforma
+  uartConfig( UART_USB, 115200 ); // Inicializar periferico UART_USB
+  i2cInit(I2C0, BME280_I2C_RATE);
+  
    if( xQueue != NULL ) {
 
-	   xTaskCreate( bme280Task, (const char *) "bme280",
+	xTaskCreate( bme280Task, (const char *) "bme280",
 			   configMINIMAL_STACK_SIZE * 2, ( void * ) 2750,
 				  tskIDLE_PRIORITY + 2, NULL );
 
-	  xTaskCreate( am2301Task, (const char *) "am2301",
+	xTaskCreate( am2301Task, (const char *) "am2301",
     		  configMINIMAL_STACK_SIZE * 2, ( void * ) 1000,
 			  tskIDLE_PRIORITY + 2, NULL );
 
-      xTaskCreate( vSenderTask2, (const char *) "Sender2",
+  xTaskCreate( vSenderTask2, (const char *) "Sender2",
     		  configMINIMAL_STACK_SIZE * 2, ( void * ) 5000,
 			  tskIDLE_PRIORITY + 2, NULL );
 
+  xTaskCreate( sdTask,(const char *) "Sd",
+          configMINIMAL_STACK_SIZE * 2, NULL, tskIDLE_PRIORITY + 3, NULL );
+
       /* Create the task that will read from the queue.  The task is created with
       priority 2, so above the priority of the sender tasks. */
-      xTaskCreate( vReceiverTask,(const char *) "Receiver",
+  xTaskCreate( vReceiverTask,(const char *) "Receiver",
     		  configMINIMAL_STACK_SIZE * 2, NULL, tskIDLE_PRIORITY + 3, NULL );
 
       /* Start the scheduler so the created tasks start executing. */
